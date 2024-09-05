@@ -1,37 +1,55 @@
 
-import { useEffect, useRef, useState } from 'react';
+import {useRef, useState } from 'react';
 import './App.css';
 import Dashboard, { TextThoughtContainer, WidgetTile } from './components/dashboard/Dashboard';
 import JokeModal from './components/sidebar/Sidebar';
 import toast, { Toaster } from 'react-hot-toast';
+import {useDispatch, useSelector } from 'react-redux';
+import { addJoke, deleteJoke } from './components/reduxActions/ReduxActions';
+
+
+type RootState = {
+  jokes: {
+    jokes: string[]; // Define the type of jokes state here
+  };
+}
+
 
 
 function App() {
-  
+  const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
-  const [jokes, setJokes] = useState<string[]>(() => {
-    const storedJokes = localStorage.getItem('jokes');
-    return storedJokes ? JSON.parse(storedJokes) : [];
-  });
+  // const [jokes, setJokes] = useState<string[]>(() => {
+  //   const storedJokes = localStorage.getItem('jokes');
+  //   return storedJokes ? JSON.parse(storedJokes) : [];
+  // });
 
+  const addNewJoke = (newJoke: string) => {
+    dispatch(addJoke(newJoke));
+    notify(); // Assuming notify is a function to show a success message
+  }
 
-  useEffect(() => {
-    localStorage.setItem('jokes', JSON.stringify(jokes));
-  }, [jokes]);
+  const deleteaJoke = (index:number) => {
+    dispatch(deleteJoke(index));
+    // You can optionally notify or perform any other actions after deleting the joke
+  }
+  // useEffect(() => {
+  //   localStorage.setItem('jokes', JSON.stringify(jokes));
+  // }, [jokes]);
   
   const notify = () => toast.success('Joke Added!');
 
-
-  const addNewJoke = (newJoke: string) => {
-    setJokes(prevJokes => [...prevJokes, newJoke]);
-    notify();
-  }
+  const jokes = useSelector((state: RootState) => state.jokes.jokes);
+  // const addNewJoke = (newJoke: string) => {
+  //   setJokes(prevJokes => [...prevJokes, newJoke]);
+  //   notify();
+  // }
   
 
-  const deleteJoke = (index:number) => {
-    setJokes(prevJokes => prevJokes.filter((_, i) => i !== index));
-  }
+  // const deleteJoke = (index:number) => {
+  //   setJokes(prevJokes => prevJokes.filter((_, i) => i !== index));
+  // }
 
 
   const openModal = () => {
@@ -45,6 +63,7 @@ function App() {
 
 
   return (
+    
     <div className="App" 
     style={{
       
@@ -54,7 +73,7 @@ function App() {
       }}>
       <Dashboard 
       jokes={jokes}
-      deleteJoke={deleteJoke}
+      deleteJoke={deleteaJoke}
       children={
           <WidgetTile
             style={{ cursor: "pointer" }}
